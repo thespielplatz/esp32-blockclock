@@ -1,0 +1,12 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"name": "esp32-blockclock",
+			"path": "../../../Documents/PlatformIO/Projects/esp32-blockclock"
+		}
+	],
+	"settings": {}
+}
