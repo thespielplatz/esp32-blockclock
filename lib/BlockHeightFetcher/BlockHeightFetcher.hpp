@@ -12,6 +12,7 @@ public:
 
 private:
     std::string text = "FETCHING";
+    bool firstFetch = true; // Flag to indicate if this is the first fetch
     bool errorMode = false;
 
     uint64_t lastSuccessUs = 0;

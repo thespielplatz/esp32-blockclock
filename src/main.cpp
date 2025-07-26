@@ -8,6 +8,9 @@
 #include "esp_log.h"
 #include "esp_timer.h"
 
+#include "secrets.h"
+#include "wifi_connect.hpp"
+
 extern "C" {
     void app_main(void);
 }
@@ -18,6 +21,14 @@ extern "C" void app_main() {
 
     WS2812Strip strip(GPIO_NUM_18, width * height);
     Display display(strip, width, height, true);
+
+    display.clear();
+    display.setColor(100, 100, 100);
+    display.writeText(0, WIFI_SSID, true);
+    display.render();
+    vTaskDelay(pdMS_TO_TICKS(10));
+
+    wifi_connect();  // Blocks until Wi-Fi is up
 
     PixelBounceAnimation anim(display, 4, 250, 125, 0, 50, 1000);
     BlockHeightFetcher fetcher;
@@ -30,8 +41,8 @@ extern "C" void app_main() {
 
         display.setColor(100, 100, 100);
         display.writeText(0, fetcher.getText(), true);
-
         display.render();
+        
         vTaskDelay(pdMS_TO_TICKS(10));
     }
 }
