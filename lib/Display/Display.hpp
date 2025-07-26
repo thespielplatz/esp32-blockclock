@@ -9,6 +9,9 @@ class Display {
 public:
     Display(WS2812Strip& strip, uint16_t width, uint16_t height, bool row_inversion = true);
     
+    uint16_t getWidth() const { return width; }
+    uint16_t getHeight() const { return height; }
+
     void set_pixel(uint16_t x, uint16_t y, uint8_t r, uint8_t g, uint8_t b);
     void fill(uint8_t r, uint8_t g, uint8_t b);
     void clear();

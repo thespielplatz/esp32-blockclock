@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <WS2812Strip.hpp>
 #include <Display.hpp>
+#include <PixelBounceAnimation.hpp>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp_log.h"
@@ -17,22 +18,21 @@ void app_main() {
     WS2812Strip strip(GPIO_NUM_18, height * width);
     Display display(strip, width, height, true); // true = serpentine layout
 
+    PixelBounceAnimation anim(display, 4, 250, 125, 0, 50, 1000);
+
     uint16_t frame = 0;
 
     while (true) {
         display.clear();
+
+        anim.update();
+
         display.setColor(100, 100, 100);
         display.writeText(0, "123456", true);
-
-        // Draw one vertical bar across all rows at position `frame`
-        uint16_t x = frame % width;
-        for (uint16_t y = 0; y < height; ++y) {
-            display.set_pixel(x, y, 0, 200, 20);  // soft greenish bar
-        }
 
         display.render();
         frame++;
 
-        vTaskDelay(pdMS_TO_TICKS(100));  // wait 100ms
+        vTaskDelay(pdMS_TO_TICKS(10));  // wait 10ms
     }
 }
