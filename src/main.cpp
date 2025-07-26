@@ -21,6 +21,7 @@ void app_main() {
 
     while (true) {
         display.clear();
+        display.writeText(0, "HELLO", false);
 
         // Draw one vertical bar across all rows at position `frame`
         uint16_t x = frame % width;
@@ -28,7 +29,7 @@ void app_main() {
             display.set_pixel(x, y, 0, 200, 20);  // soft greenish bar
         }
 
-        display.refresh();
+        display.render();
         frame++;
 
         vTaskDelay(pdMS_TO_TICKS(100));  // wait 100ms
