@@ -49,10 +49,13 @@ esp_err_t Display::writeText(int offset, const std::string& text, bool centered)
 
         for (int col = 0; col < CHAR_WIDTH; ++col) {
             if (char_x + col < 0 || char_x + col >= width) continue;
-            uint8_t bits = col_data[col];
             for (int row = 0; row < CHAR_HEIGHT; ++row) {
-                if ((bits >> (CHAR_HEIGHT - 1 - row)) & 0x01) {
-                    set_pixel(char_x + col, row, 100, 100, 100); // white-ish
+                uint8_t bits = col_data[row];  // bits for that row (i.e., bits for columns)
+
+                for (int col = 0; col < CHAR_WIDTH; ++col) {
+                    if ((bits >> (CHAR_WIDTH - 1 - col)) & 0x01) {
+                        set_pixel(char_x + col, row, 100, 100, 100);  // Light gray
+                    }
                 }
             }
         }

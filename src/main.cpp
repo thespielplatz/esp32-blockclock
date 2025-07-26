@@ -21,7 +21,7 @@ void app_main() {
 
     while (true) {
         display.clear();
-        display.writeText(0, "HELLO", false);
+        display.writeText(0, "123456", true);
 
         // Draw one vertical bar across all rows at position `frame`
         uint16_t x = frame % width;
