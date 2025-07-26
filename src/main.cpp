@@ -21,6 +21,7 @@ void app_main() {
 
     while (true) {
         display.clear();
+        display.setColor(100, 100, 100);
         display.writeText(0, "123456", true);
 
         // Draw one vertical bar across all rows at position `frame`

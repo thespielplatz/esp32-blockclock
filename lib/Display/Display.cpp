@@ -28,6 +28,10 @@ void Display::fill(uint8_t r, uint8_t g, uint8_t b) {
     }
 }
 
+void Display::setColor(uint8_t r, uint8_t g, uint8_t b) {
+    currentColor = {r, g, b};
+}
+
 esp_err_t Display::writeText(int offset, const std::string& text, bool centered)
 {
     const int CHAR_WIDTH = 3;
@@ -54,7 +58,7 @@ esp_err_t Display::writeText(int offset, const std::string& text, bool centered)
 
                 for (int col = 0; col < CHAR_WIDTH; ++col) {
                     if ((bits >> (CHAR_WIDTH - 1 - col)) & 0x01) {
-                        set_pixel(char_x + col, row, 100, 100, 100);  // Light gray
+                        set_pixel(char_x + col, row, currentColor[0], currentColor[1], currentColor[2]);
                     }
                 }
             }
