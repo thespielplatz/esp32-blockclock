@@ -44,3 +44,12 @@ It includes a web-based user interface for configuration and handles Wi-Fi auto-
 4. Upload the firmware:
    ```bash
    pio run -t upload
+
+
+## Docs
+
+- ESP Web Tools: https://esphome.github.io/esp-web-tools/
+- Improv Serial: https://www.improv-wifi.com/serial/
+- Imporv C++ SDK: https://github.com/improv-wifi/sdk-cpp/blob/main/README.md
+- Improv Webserver Demo: https://jnthas.github.io/improv-wifi-demo/
+- Improv Webserver Demo Source: https://github.com/jnthas/improv-wifi-demo/blob/main/src/esp32-wifiimprov/esp32-wifiimprov.ino
