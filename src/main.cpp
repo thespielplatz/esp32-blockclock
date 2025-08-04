@@ -26,19 +26,19 @@ void showMessage(Display& display, const char* message) {
     vTaskDelay(pdMS_TO_TICKS(10));
 }
 
-void showError(Display& display, const char* message) {
+void improvLoop(Display& display, ImprovManager& improvManager, const char* error) {
     display.clear();
     display.setColor(255, 0, 0);
-    display.writeText(0, message, true);
+    display.writeText(0, error, true);
     display.render();
-    vTaskDelay(pdMS_TO_TICKS(10000));
+    vTaskDelay(pdMS_TO_TICKS(2000));
 
-    display.clear();
-    display.setColor(0, 250, 0);
-    display.writeText(0, "Reboot", true);
-    display.render();
-    vTaskDelay(pdMS_TO_TICKS(2000));    
-    esp_restart();  // Clean reboot
+    ESP_LOGI(TAG, "Improv Manager Loop");
+    showMessage(display, "Improv Manager");
+    while (true) {
+        improvManager.loop();
+        vTaskDelay(pdMS_TO_TICKS(10));
+    }    
 }
 
 extern "C" void app_main() {
@@ -58,13 +58,13 @@ extern "C" void app_main() {
 
     if (NVSStore::initNvsFlash() != true) {
         ESP_LOGE(TAG, "Failed to initialize NVS");
-        showError(display, "NVS Init");
+        improvLoop(display, improvManager,"NVS Init");
         return;
     }
 
     if (wifiManager.begin() != true) {
         ESP_LOGE(TAG, "Failed to initialize Wi-Fi");
-        showError(display, "Wi-Fi Init");
+        improvLoop(display, improvManager, "Wi-Fi Init");
         vTaskDelay(pdMS_TO_TICKS(10000));
         return;
     }
@@ -74,7 +74,7 @@ extern "C" void app_main() {
     std::string ssid = wifiManager.loadSavedSsid();
     if (ssid.empty()) {
         ESP_LOGI(TAG, "No saved Wi-Fi credentials found");
-        showError(display, "No Credentials");
+        improvLoop(display, improvManager, "No Credentials");
     }
 
     ESP_LOGI(TAG, "Attempting to reconnect");
@@ -83,11 +83,13 @@ extern "C" void app_main() {
     if (!wifiManager.connectToSaved()) {
         if (wifiManager.getStatus() == WifiManager::Status::NO_CREDENTIALS) {
             ESP_LOGI(TAG, "No Wi-Fi credentials found");
-            showError(display, "No Credentials");
+            improvLoop(display, improvManager, "No Credentials");
         }
         ESP_LOGI(TAG, "Connect Failed");
-        showError(display, "Connect Failed");
+        improvLoop(display, improvManager, "Connect Failed");
     }
+
+
 
     PixelBounceAnimation anim(display, 4, 250, 125, 0, 50, 1000);
     BlockHeightFetcher fetcher;
