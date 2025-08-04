@@ -5,6 +5,7 @@
 
 class NVSStore {
 public:
+    static bool initNvsFlash();
     explicit NVSStore(const char* namespace_name);
     ~NVSStore();
 

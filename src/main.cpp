@@ -7,11 +7,22 @@
 #include "freertos/task.h"
 #include "esp_log.h"
 #include "esp_timer.h"
+#include "NVSStore.hpp"
 
 #include <ImprovWifiManager.hpp>
 
+static const char *TAG = "main";
+
 extern "C" {
     void app_main(void);
+}
+
+void showError(Display& display, const char* message) {
+    display.clear();
+    display.setColor(255, 0, 0);
+    display.writeText(0, message, true);
+    display.render();
+    vTaskDelay(pdMS_TO_TICKS(10));
 }
 
 extern "C" void app_main() {
@@ -27,6 +38,13 @@ extern "C" void app_main() {
 
     WS2812Strip strip(GPIO_NUM_18, width * height);
     Display display(strip, width, height, true);
+
+    if (NVSStore::initNvsFlash() != true) {
+        ESP_LOGE(TAG, "Failed to initialize NVS");
+        showError(display, "NVS Init");
+        vTaskDelay(pdMS_TO_TICKS(10000));
+        return;
+    }
 
     display.clear();
     display.setColor(100, 100, 100);

@@ -5,6 +5,17 @@
 
 static const char* TAG = "NVSStore";
 
+
+bool NVSStore::initNvsFlash() {
+    esp_err_t ret = nvs_flash_init();
+    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+        if (nvs_flash_erase() != ESP_OK || nvs_flash_init() != ESP_OK) {
+            return false;
+        }
+    }
+    return true;
+}
+
 NVSStore::NVSStore(const char* namespace_name) : _namespace(namespace_name) {}
 
 NVSStore::~NVSStore() {}
