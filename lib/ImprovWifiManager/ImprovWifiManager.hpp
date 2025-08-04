@@ -27,12 +27,6 @@ private:
     ImprovConnector connector;
     std::vector<std::string> deviceInfos;
 
-    static constexpr uart_port_t uart_num = UART_NUM_0;
-    static constexpr int BUF_SIZE = 256;
-
-    uint8_t x_buffer[BUF_SIZE];   // Buffer for incoming Improv serial data
-    size_t x_position = 0;        // Current position in buffer
-
     // Improv callback handlers
     bool onCommandCallback(improv::ImprovCommand cmd);
     static void onErrorCallback(improv::Error err);

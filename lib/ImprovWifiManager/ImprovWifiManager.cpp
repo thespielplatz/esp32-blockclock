@@ -7,9 +7,7 @@
 #include "esp_event.h"
 #include "esp_netif.h"
 #include <cstring>
-#include <sstream>  // ✅ Required for std::stringstream
-
-#include "improv.h"
+#include <sstream>
 
 #define MAX_ATTEMPTS_WIFI_CONNECTION 20
 
@@ -93,24 +91,7 @@ void ImprovWifiManager::connect_to_saved_wifi() {
 }
 
 void ImprovWifiManager::loop() {
-    uint8_t b;
-
-    // Try to read 1 byte with 10ms timeout
-    while (uart_read_bytes(uart_num, &b, 1, pdMS_TO_TICKS(10)) > 0) {
-        // Attempt to parse incoming byte using the Improv protocol
-        if (parse_improv_serial_byte(x_position, b, x_buffer, static_onCommandCallback, onErrorCallback)) {
-            if (x_position < BUF_SIZE - 1) {
-                x_buffer[x_position++] = b;
-            } else {
-                // Avoid overflow
-                ESP_LOGW(TAG, "Buffer overflow");
-                x_position = 0;
-            }
-        } else {
-            // Reset buffer position if invalid
-            x_position = 0;
-        }
-    }
+    connector.loop(static_onCommandCallback, onErrorCallback);
 }
 
 void ImprovWifiManager::onErrorCallback(improv::Error err) {

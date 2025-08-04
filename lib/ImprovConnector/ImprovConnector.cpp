@@ -76,3 +76,20 @@ void ImprovConnector::send_response(std::vector<uint8_t> &response) {
 
     uart_write_bytes(uart_num, reinterpret_cast<const char*>(data.data()), data.size());
 }
+
+void ImprovConnector::loop(bool (*onCommandCallback)(improv::ImprovCommand), void (*onErrorCallback)(improv::Error)) {
+    uint8_t b;
+
+    while (uart_read_bytes(uart_num, &b, 1, pdMS_TO_TICKS(10)) > 0) {
+        if (parse_improv_serial_byte(x_position, b, x_buffer, onCommandCallback, onErrorCallback)) {
+            if (x_position < sizeof(x_buffer) - 1) {
+                x_buffer[x_position++] = b;
+            } else {
+                ESP_LOGW(TAG, "Buffer overflow");
+                x_position = 0;
+            }
+        } else {
+            x_position = 0;
+        }
+    }
+}
