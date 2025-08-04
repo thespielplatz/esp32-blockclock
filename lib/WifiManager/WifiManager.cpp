@@ -10,7 +10,7 @@
 
 WifiManager::WifiManager() {}
 
-void WifiManager::begin() {
+bool WifiManager::begin() {
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     if (esp_netif_init() != ESP_OK ||
         esp_event_loop_create_default() != ESP_OK ||
@@ -18,11 +18,12 @@ void WifiManager::begin() {
         esp_wifi_set_mode(WIFI_MODE_STA) != ESP_OK ||
         esp_wifi_start() != ESP_OK) {
         currentStatus = Status::ERROR;
-        return;
+        return false;
     }
 
     esp_netif_create_default_wifi_sta();
     currentStatus = Status::NOT_CONNECTED;
+    return true;
 }
 
 bool WifiManager::connect(const std::string& ssid, const std::string& password) {
@@ -36,7 +37,6 @@ bool WifiManager::connect(const std::string& ssid, const std::string& password) 
         return false;
     }
 
-    lastConnectedSSID = ssid;
     currentStatus = Status::CONNECTING;
 
     for (int i = 0; i < MAX_ATTEMPTS; ++i) {
@@ -51,6 +51,14 @@ bool WifiManager::connect(const std::string& ssid, const std::string& password) 
     esp_wifi_disconnect();
     currentStatus = Status::NOT_CONNECTED;
     return false;
+}
+
+std::string WifiManager::loadSavedSsid() {
+    std::string ssid, password;
+    if (loadCredentials(ssid, password)) {
+        return ssid;
+    }
+    return "";
 }
 
 bool WifiManager::connectToSaved() {
@@ -102,17 +110,4 @@ bool WifiManager::isConnected() {
 
 WifiManager::Status WifiManager::getStatus() {
     return currentStatus;
-}
-
-std::string WifiManager::getConnectedSSID() {
-    if (!lastConnectedSSID.empty()) {
-        return lastConnectedSSID;
-    }
-
-    wifi_ap_record_t ap_info;
-    if (esp_wifi_sta_get_ap_info(&ap_info) == ESP_OK) {
-        return std::string(reinterpret_cast<const char*>(ap_info.ssid));
-    }
-
-    return "";
 }

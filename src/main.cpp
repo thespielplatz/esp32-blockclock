@@ -9,7 +9,8 @@
 #include "esp_timer.h"
 #include "NVSStore.hpp"
 
-#include <ImprovWifiManager.hpp>
+#include <ImprovManager.hpp>
+#include <WifiManager.hpp>
 
 static const char *TAG = "main";
 
@@ -17,21 +18,37 @@ extern "C" {
     void app_main(void);
 }
 
-void showError(Display& display, const char* message) {
+void showMessage(Display& display, const char* message) {
     display.clear();
-    display.setColor(255, 0, 0);
+    display.setColor(0, 0, 250);
     display.writeText(0, message, true);
     display.render();
     vTaskDelay(pdMS_TO_TICKS(10));
 }
 
+void showError(Display& display, const char* message) {
+    display.clear();
+    display.setColor(255, 0, 0);
+    display.writeText(0, message, true);
+    display.render();
+    vTaskDelay(pdMS_TO_TICKS(10000));
+
+    display.clear();
+    display.setColor(0, 250, 0);
+    display.writeText(0, "Reboot", true);
+    display.render();
+    vTaskDelay(pdMS_TO_TICKS(2000));    
+    esp_restart();  // Clean reboot
+}
+
 extern "C" void app_main() {
-    ImprovWifiManager wifiManager({
+    WifiManager wifiManager;
+    ImprovManager improvManager({
         "ESP32-Blockclock",  // firmware name
         "1.0.0",             // firmware version
         "ESP32",             // hardware variant
         "Blockclock"         // device name
-    });
+    }, wifiManager);
 
     uint16_t width = 50;
     uint16_t height = 5;
@@ -42,17 +59,35 @@ extern "C" void app_main() {
     if (NVSStore::initNvsFlash() != true) {
         ESP_LOGE(TAG, "Failed to initialize NVS");
         showError(display, "NVS Init");
+        return;
+    }
+
+    if (wifiManager.begin() != true) {
+        ESP_LOGE(TAG, "Failed to initialize Wi-Fi");
+        showError(display, "Wi-Fi Init");
         vTaskDelay(pdMS_TO_TICKS(10000));
         return;
     }
 
-    display.clear();
-    display.setColor(100, 100, 100);
-    display.writeText(0, "Connecting", true);
-    display.render();
-    vTaskDelay(pdMS_TO_TICKS(10));
+    improvManager.begin();
 
-    wifiManager.begin();
+    std::string ssid = wifiManager.loadSavedSsid();
+    if (ssid.empty()) {
+        ESP_LOGI(TAG, "No saved Wi-Fi credentials found");
+        showError(display, "No Credentials");
+    }
+
+    ESP_LOGI(TAG, "Attempting to reconnect");
+    showMessage(display, ssid.c_str());
+
+    if (!wifiManager.connectToSaved()) {
+        if (wifiManager.getStatus() == WifiManager::Status::NO_CREDENTIALS) {
+            ESP_LOGI(TAG, "No Wi-Fi credentials found");
+            showError(display, "No Credentials");
+        }
+        ESP_LOGI(TAG, "Connect Failed");
+        showError(display, "Connect Failed");
+    }
 
     PixelBounceAnimation anim(display, 4, 250, 125, 0, 50, 1000);
     BlockHeightFetcher fetcher;
@@ -67,7 +102,7 @@ extern "C" void app_main() {
         display.writeText(0, fetcher.getText(), true);
         display.render();
 
-        wifiManager.loop();
+        improvManager.loop();
         
         vTaskDelay(pdMS_TO_TICKS(10));
     }

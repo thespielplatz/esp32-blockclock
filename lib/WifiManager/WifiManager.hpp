@@ -14,7 +14,7 @@ public:
     };
 
     WifiManager();
-    void begin();
+    bool begin();
     bool connect(const std::string& ssid, const std::string& password);
     bool connectToSaved();
     bool saveCredentials(const std::string& ssid, const std::string& password);
@@ -22,10 +22,9 @@ public:
     std::vector<std::tuple<std::string, int, bool>> scanNetworks();
     bool isConnected();
     Status getStatus();
-    std::string getConnectedSSID();
+    std::string loadSavedSsid();
 
 private:
     static constexpr uint8_t MAX_ATTEMPTS = 20;
     Status currentStatus = Status::NOT_CONNECTED;
-    std::string lastConnectedSSID = "";
 };
